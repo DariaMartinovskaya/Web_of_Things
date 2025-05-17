@@ -56,3 +56,46 @@ WoT.requestThingDescription("coap://localhost:5683/counter")
     .catch((err) => {
         console.error("Fetch error:", err);
     });
+
+    WoT.consume(require("./counter.td.json")).then(async (thing) => {
+        console.log("Client connected to Thing: " + thing.title);
+
+        // Подписка на изменение счетчика
+        await thing.observeProperty("count", async (data) => {
+          const value = await data.value();
+          console.log("Observed new count: " + value);
+        });
+
+        // Подписка на событие presenceDetected
+        await thing.subscribeEvent("presenceDetected", async (data) => {
+          const event = await data.value();
+          console.log("Presence detected! Event data:", event);
+        });
+
+        // Цикл ожидания ввода пользователя
+        const readline = require("readline");
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout
+        });
+
+        function promptCommand() {
+          rl.question("Enter command (inc/dec/reset/exit): ", async (cmd) => {
+            if (cmd === "inc") {
+              await thing.invokeAction("increment", undefined, { uriVariables: { step: 1 } });
+            } else if (cmd === "dec") {
+              await thing.invokeAction("decrement", undefined, { uriVariables: { step: 1 } });
+            } else if (cmd === "reset") {
+              await thing.invokeAction("reset");
+            } else if (cmd === "exit") {
+              rl.close();
+              return;
+            } else {
+              console.log("Unknown command");
+            }
+            promptCommand(); // Повторно запрашиваем команду
+          });
+        }
+
+        promptCommand(); // Начинаем цикл
+      });
