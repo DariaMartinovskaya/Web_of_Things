@@ -32,23 +32,32 @@ WoT.requestThingDescription("coap://localhost:5683/counter")
             console.info("=== TD ===");
             console.info(td);
             console.info("==========");
+
+            // ADDED FOR VISUALIZATION
+            console.log("Client connected to Thing: " + thing.title);
+
             // read property #1
             const read1 = await thing.readProperty("count");
             console.log("count value is", await read1.value());
+
             // increment property #1 (without step)
             await thing.invokeAction("increment");
             const inc1 = await thing.readProperty("count");
             console.info("count value after increment #1 is", await inc1.value());
+
             // increment property #2 (with step)
             await thing.invokeAction("increment", undefined, { uriVariables: { step: 3 } });
             const inc2 = await thing.readProperty("count");
             console.info("count value after increment #2 (with step 3) is", await inc2.value());
+
+
             // look for the first form for decrement with CoAP binding
             await thing.invokeAction("decrement", undefined, {
                 formIndex: getFormIndexForDecrementWithCoAP(thing),
             });
             const dec1 = await thing.readProperty("count");
             console.info("count value after decrement is", await dec1.value());
+
         } catch (err) {
             console.error("Script error:", err);
         }
@@ -60,42 +69,15 @@ WoT.requestThingDescription("coap://localhost:5683/counter")
     WoT.consume(require("./counter.td.json")).then(async (thing) => {
         console.log("Client connected to Thing: " + thing.title);
 
-        // Подписка на изменение счетчика
+        // Added: Subscribtion to change counter
         await thing.observeProperty("count", async (data) => {
           const value = await data.value();
           console.log("Observed new count: " + value);
         });
 
-        // Подписка на событие presenceDetected
+        // Added: Subscribtion to the presenceDetected event
         await thing.subscribeEvent("presenceDetected", async (data) => {
           const event = await data.value();
           console.log("Presence detected! Event data:", event);
         });
-
-        // Цикл ожидания ввода пользователя
-        const readline = require("readline");
-        const rl = readline.createInterface({
-          input: process.stdin,
-          output: process.stdout
-        });
-
-        function promptCommand() {
-          rl.question("Enter command (inc/dec/reset/exit): ", async (cmd) => {
-            if (cmd === "inc") {
-              await thing.invokeAction("increment", undefined, { uriVariables: { step: 1 } });
-            } else if (cmd === "dec") {
-              await thing.invokeAction("decrement", undefined, { uriVariables: { step: 1 } });
-            } else if (cmd === "reset") {
-              await thing.invokeAction("reset");
-            } else if (cmd === "exit") {
-              rl.close();
-              return;
-            } else {
-              console.log("Unknown command");
-            }
-            promptCommand(); // Повторно запрашиваем команду
-          });
-        }
-
-        promptCommand(); // Начинаем цикл
       });
