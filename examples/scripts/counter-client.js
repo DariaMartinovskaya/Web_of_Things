@@ -69,7 +69,7 @@ WoT.requestThingDescription("coap://localhost:5683/counter")
     WoT.consume(require("./counter.td.json")).then(async (thing) => {
         console.log("Client connected to Thing: " + thing.title);
 
-        // Added: Subscribtion to change counter
+        // Added: Subscribtion to change counter (!)
         await thing.observeProperty("count", async (data) => {
           const value = await data.value();
           console.log("Observed new count: " + value);
