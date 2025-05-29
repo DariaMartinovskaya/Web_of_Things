@@ -1,0 +1,85 @@
+{
+    "@context": [
+      "https://www.w3.org/2019/wot/td/v1",
+      "https://www.w3.org/2022/wot/td/v1.1",
+      {
+        "@language": "en"
+      }
+    ],
+    "@type": "Thing",
+    "id": "urn:dev:wot:coffee-machine",
+    "title": "CoffeeMachine",
+    "securityDefinitions": {
+      "nosec_sc": {
+        "scheme": "nosec"
+      }
+    },
+    "security": ["nosec_sc"],
+    "properties": {
+      "availableResourceLevel": {
+        "type": "integer",
+        "readOnly": true,
+        "observable": true,
+        "forms": [
+          {
+            "href": "mqtt://test.mosquitto.org/CoffeeMachine/properties/availableResourceLevel",
+            "contentType": "application/json",
+            "op": ["readproperty", "observeproperty"]
+          }
+        ]
+      },
+      "possibleDrinks": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "readOnly": true,
+        "forms": [
+          {
+            "href": "mqtt://test.mosquitto.org/CoffeeMachine/properties/possibleDrinks",
+            "contentType": "application/json",
+            "op": ["readproperty"]
+          }
+        ]
+      },
+      "maintenanceNeeded": {
+        "type": "boolean",
+        "readOnly": true,
+        "forms": [
+          {
+            "href": "mqtt://test.mosquitto.org/CoffeeMachine/properties/maintenanceNeeded",
+            "contentType": "application/json",
+            "op": ["readproperty"]
+          }
+        ]
+      }
+    },
+    "actions": {
+      "makeDrink": {
+        "input": {
+          "type": "string"
+        },
+        "forms": [
+          {
+            "href": "mqtt://test.mosquitto.org/CoffeeMachine/actions/makeDrink",
+            "contentType": "application/json",
+            "op": ["invokeaction"]
+          }
+        ]
+      }
+    },
+    "events": {
+      "outOfResource": {
+        "data": {
+          "type": "string"
+        },
+        "forms": [
+          {
+            "href": "mqtt://test.mosquitto.org/CoffeeMachine/events/outOfResource",
+            "contentType": "application/json",
+            "op": ["subscribeevent"]
+          }
+        ]
+      }
+    }
+  }
